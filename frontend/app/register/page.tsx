@@ -235,12 +235,6 @@ export default function RegisterPage() {
             </Link>
           </p>
         </div>
-
-        <div className="mt-12 text-center">
-          <p className="text-xs text-gray-600">
-            © 2024 NoteStream Inc. All rights reserved.
-          </p>
-        </div>
       </div>
     </div>
   );

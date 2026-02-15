@@ -2,48 +2,40 @@
 
 import API from "@/lib/api";
 import {
-  FileText,
-  Bookmark,
-  LogOut,
   Search,
   Star,
   Trash2,
   ExternalLink,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AddBookmarkModal from "@/components/AddBookmarkModal";
 import { useAuthStore } from "@/store/auth";
+import Sidebar from "@/components/Sidebar";
 
 export default function BookmarksPage() {
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedBookmark, setSelectedBookmark] = useState<any>(null);
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // 🔐 Protect route
   useEffect(() => {
     const token = localStorage.getItem("token");
-
-    if (!token) {
-      router.push("/");
-    } else {
-      fetchBookmarks();
-    }
+    if (!token) router.push("/");
+    else fetchBookmarks();
   }, [router]);
 
-  // 🔎 Debounced search
   useEffect(() => {
     const delay = setTimeout(() => {
       fetchBookmarks(search);
     }, 400);
-
     return () => clearTimeout(delay);
   }, [search]);
 
@@ -52,86 +44,31 @@ export default function BookmarksPage() {
       setLoading(true);
       const res = await API.get(`/bookmarks?q=${query}`);
       setBookmarks(res.data.bookmarks);
-    } catch {
-      console.error("Failed to fetch bookmarks");
     } finally {
       setLoading(false);
     }
   };
 
   const toggleFavorite = async (id: string) => {
-    try {
-      await API.patch(`/bookmarks/${id}/favorite`);
-      fetchBookmarks(search);
-    } catch {
-      console.error("Failed to toggle favorite");
-    }
+    await API.patch(`/bookmarks/${id}/favorite`);
+    fetchBookmarks(search);
   };
 
   const deleteBookmark = async (id: string) => {
-    try {
-      await API.delete(`/bookmarks/${id}`);
-      fetchBookmarks(search);
-    } catch {
-      console.error("Failed to delete bookmark");
-    }
+    await API.delete(`/bookmarks/${id}`);
+    fetchBookmarks(search);
   };
 
-  const handleLogout = () => {
-    logout();
-    router.push("/");
+  const handleEdit = (bookmark: any) => {
+    setSelectedBookmark(bookmark);
+    setIsCreateOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-[#0f1419] flex">
-      {/* SIDEBAR */}
-      <aside className="w-60 bg-[#0a0e13] border-r border-gray-800 flex flex-col">
-        <div className="p-6 border-b border-gray-800">
-          <Link href="/notes" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-              <FileText className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-semibold text-white">
-              NoteMark
-            </span>
-          </Link>
-        </div>
+      <Sidebar />
 
-        <nav className="flex-1 p-4 space-y-1">
-          <Link
-            href="/notes"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800/50"
-          >
-            <FileText className="w-5 h-5" />
-            <span className="font-medium">Notes</span>
-          </Link>
-
-          <Link
-            href="/bookmarks"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600/10 text-blue-500"
-          >
-            <Bookmark className="w-5 h-5" />
-            <span className="font-medium">Bookmarks</span>
-            <span className="ml-auto bg-blue-600/20 text-blue-400 text-xs font-medium px-2 py-1 rounded">
-              {bookmarks.length}
-            </span>
-          </Link>
-        </nav>
-
-        <div className="p-4 border-t border-gray-800">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2 text-red-500 hover:bg-red-500/10 rounded-lg w-full"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Logout</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* MAIN */}
       <main className="flex-1 flex flex-col">
-        {/* HEADER */}
         <header className="h-20 border-b border-gray-800 flex items-center justify-between px-8">
           <div className="flex-1 max-w-xl relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
@@ -148,7 +85,6 @@ export default function BookmarksPage() {
           </Button>
         </header>
 
-        {/* CONTENT */}
         <div className="flex-1 p-8">
           <h1 className="text-2xl font-semibold text-white mb-6">
             Your Bookmarks
@@ -179,6 +115,10 @@ export default function BookmarksPage() {
                               : "text-gray-400"
                           }`}
                         />
+                      </button>
+
+                      <button onClick={() => handleEdit(bm)}>
+                        <Pencil className="w-5 h-5 text-blue-400" />
                       </button>
 
                       <button onClick={() => deleteBookmark(bm._id)}>
@@ -216,11 +156,11 @@ export default function BookmarksPage() {
         </div>
       </main>
 
-      {/* MODAL */}
       <AddBookmarkModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         fetchBookmarks={() => fetchBookmarks(search)}
+        bookmark={selectedBookmark}
       />
     </div>
   );

@@ -12,7 +12,7 @@ interface AddBookmarkModalProps {
   isOpen: boolean;
   onClose: () => void;
   fetchBookmarks: () => void;
-  bookmark?: any; // 👈 edit mode
+  bookmark?: any;
 }
 
 export default function AddBookmarkModal({
@@ -29,8 +29,8 @@ export default function AddBookmarkModal({
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [inputWidth, setInputWidth] = useState(120);
 
-  // 🧠 Prefill in edit mode
   useEffect(() => {
     if (bookmark) {
       setUrl(bookmark.url);
@@ -39,6 +39,14 @@ export default function AddBookmarkModal({
       setTags(bookmark.tags || []);
     }
   }, [bookmark]);
+
+  useEffect(() => {
+  const span = document.getElementById("tag-sizer");
+  if (span) {
+    span.textContent = tagInput || "Press Enter to add tag";
+    setInputWidth(span.offsetWidth + 2);
+  }
+}, [tagInput]);
 
   const addTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && tagInput.trim()) {
@@ -58,12 +66,7 @@ export default function AddBookmarkModal({
     try {
       setLoading(true);
 
-      const payload = {
-        url,
-        title,
-        description,
-        tags,
-      };
+      const payload = { url, title, description, tags };
 
       if (isEditMode) {
         await API.put(`/bookmarks/${bookmark._id}`, payload);
@@ -91,50 +94,70 @@ export default function AddBookmarkModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-[#1a2332] border-[#2d3748] text-white max-w-lg p-0 [&>button]:hidden">
+  <Dialog open={isOpen} onOpenChange={handleClose}>
+    <DialogContent className="bg-[#1a2332] border-[#2d3748] text-white max-w-lg w-full p-0 max-h-[90vh] flex flex-col [&>button]:hidden">
 
-        {/* HEADER */}
-        <div className="p-6 border-b border-[#2d3748] flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            {isEditMode ? "Edit Bookmark" : "Add New Bookmark"}
-          </h2>
+      {/* HEADER */}
+      <div className="p-6 border-b border-[#2d3748] flex items-center justify-between">
+        <h2 className="text-xl font-semibold">
+          {isEditMode ? "Edit Bookmark" : "Add New Bookmark"}
+        </h2>
 
-          <button onClick={handleClose} className="text-gray-400 hover:text-white">
-            <X className="w-7 h-7" />
-          </button>
-        </div>
+        <button onClick={handleClose} className="text-gray-400 hover:text-white">
+          <X className="w-7 h-7" />
+        </button>
+      </div>
 
-        {/* BODY */}
-        <div className="p-6 space-y-5">
+      {/* SCROLLABLE BODY */}
+      <div className="p-6 space-y-5 overflow-y-auto">
 
+        {/* URL */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-400">
+            URL <span className="text-red-500">*</span>
+          </label>
           <Input
             placeholder="https://example.com"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             className="bg-[#0f1419] border-[#2d3748] text-white h-12"
           />
+        </div>
 
+        {/* TITLE */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-400">Title (optional)</label>
           <Input
-            placeholder="Title (optional)"
+            placeholder="Enter bookmark title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="bg-[#0f1419] border-[#2d3748] text-white h-12"
           />
+        </div>
 
+        {/* DESCRIPTION */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-400">Description</label>
           <Textarea
-            placeholder="Description"
+            placeholder="Write a short description..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="bg-[#0f1419] border-[#2d3748] text-white min-h-[100px]"
+            className="bg-[#0f1419] border-[#2d3748] text-white min-h-[120px]"
           />
+        </div>
 
-          {/* TAG INPUT */}
-          <div className="flex flex-wrap gap-2 p-3 bg-[#0f1419] border border-[#2d3748] rounded-md">
+        {/* TAGS */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-400">Tags</label>
+
+          <div
+            className="flex flex-wrap items-center gap-2 px-3 py-2 bg-[#0f1419] border border-[#2d3748] rounded-md min-h-[48px] cursor-text"
+            onClick={() => document.getElementById("tagInput")?.focus()}
+          >
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-1 bg-blue-600 text-sm rounded flex items-center gap-1"
+                className="px-2 py-1 bg-blue-600 text-sm rounded flex items-center gap-1 whitespace-nowrap"
               >
                 {tag}
                 <button onClick={() => removeTag(tag)}>
@@ -143,44 +166,52 @@ export default function AddBookmarkModal({
               </span>
             ))}
 
+            {/* Auto-width input */}
             <input
+              id="tagInput"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={addTag}
-              placeholder="Add tag..."
-              className="bg-transparent outline-none text-sm text-white flex-1"
+              placeholder="Press Enter to add tag"
+              style={{ width: inputWidth }}
+              className="bg-transparent outline-none text-sm text-white"
+            />
+
+            {/* Hidden width calculator */}
+            <span
+              id="tag-sizer"
+              className="absolute invisible whitespace-pre text-sm px-1"
             />
           </div>
-
         </div>
+      </div>
 
-        {/* FOOTER */}
-        <div className="p-6 border-t border-[#2d3748] flex justify-end gap-3">
+      {/* FOOTER */}
+      <div className="p-6 border-t border-[#2d3748] flex justify-end gap-3">
+        <Button
+          onClick={handleClose}
+          variant="outline"
+          className="bg-transparent border-[#2d3748] text-gray-300 hover:bg-[#2d3748]"
+        >
+          Cancel
+        </Button>
 
-          <Button
-            onClick={handleClose}
-            variant="outline"
-            className="bg-transparent border-[#2d3748] text-gray-300 hover:bg-[#2d3748]"
-          >
-            Cancel
-          </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px]"
+        >
+          {loading
+            ? isEditMode
+              ? "Updating..."
+              : "Saving..."
+            : isEditMode
+            ? "Update Bookmark"
+            : "Save Bookmark"}
+        </Button>
+      </div>
 
-          <Button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px]"
-          >
-            {loading
-              ? isEditMode
-                ? "Updating..."
-                : "Saving..."
-              : isEditMode
-              ? "Update Bookmark"
-              : "Save Bookmark"}
-          </Button>
-
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+    </DialogContent>
+  </Dialog>
+);
 }

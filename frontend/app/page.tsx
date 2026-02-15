@@ -193,20 +193,6 @@ export default function Home() {
             </Link>
           </p>
         </div>
-
-        <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
-          <Link href="#" className="hover:text-gray-400">
-            Privacy Policy
-          </Link>
-          <span>·</span>
-          <Link href="#" className="hover:text-gray-400">
-            Terms of Service
-          </Link>
-          <span>·</span>
-          <Link href="#" className="hover:text-gray-400">
-            Contact Support
-          </Link>
-        </div>
       </div>
     </div>
   );
