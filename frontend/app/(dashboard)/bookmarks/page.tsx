@@ -1,29 +1,24 @@
 "use client";
 
 import API from "@/lib/api";
-import {
-  Search,
-  Star,
-  Trash2,
-  ExternalLink,
-  Pencil,
-} from "lucide-react";
+import { Search, Star, Trash2, ExternalLink, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AddBookmarkModal from "@/components/AddBookmarkModal";
-import { useAuthStore } from "@/store/auth";
-import Sidebar from "@/components/Sidebar";
+import CardSkeleton from "@/components/skeletons/CardSkeleton";
 
 export default function BookmarksPage() {
   const router = useRouter();
-  const logout = useAuthStore((state) => state.logout);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedBookmark, setSelectedBookmark] = useState<any>(null);
   const [bookmarks, setBookmarks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -33,19 +28,19 @@ export default function BookmarksPage() {
   }, [router]);
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      fetchBookmarks(search);
-    }, 400);
+    const delay = setTimeout(() => fetchBookmarks(search), 400);
     return () => clearTimeout(delay);
   }, [search]);
 
   const fetchBookmarks = async (query = "") => {
     try {
-      setLoading(true);
+      if (initialLoading) setLoading(true);
+
       const res = await API.get(`/bookmarks?q=${query}`);
       setBookmarks(res.data.bookmarks);
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
 
@@ -65,96 +60,86 @@ export default function BookmarksPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f1419] flex">
-      <Sidebar />
+    <main className="flex-1 flex flex-col bg-[#0f1419] min-h-screen">
 
-      <main className="flex-1 flex flex-col">
-        <header className="h-20 border-b border-gray-800 flex items-center justify-between px-8">
-          <div className="flex-1 max-w-xl relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search your bookmarks..."
-              className="pl-10 bg-[#1a2332] border-[#2d3748] text-white"
-            />
+      <header className="h-20 border-b border-gray-800 flex items-center justify-between px-8">
+        <div className="flex-1 max-w-xl relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search your bookmarks..."
+            className="pl-10 bg-[#1a2332] border-[#2d3748] text-white"
+          />
+        </div>
+
+        <Button onClick={() => setIsCreateOpen(true)}>
+          + Add Bookmark
+        </Button>
+      </header>
+
+      <div className="flex-1 p-8">
+        <h1 className="text-2xl font-semibold text-white mb-6">
+          Your Bookmarks
+        </h1>
+
+        {initialLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
           </div>
+        ) : bookmarks.length === 0 ? (
+          <p className="text-gray-400">No bookmarks yet</p>
+        ) : (
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ${
+              loading ? "opacity-50" : ""
+            }`}
+          >
+            {bookmarks.map((bm) => (
+              <div
+                key={bm._id}
+                className="bg-[#1a2332] border border-[#2d3748] rounded-lg p-5"
+              >
+                <div className="flex justify-between mb-2">
+                  <h3 className="text-white font-semibold">{bm.title}</h3>
 
-          <Button onClick={() => setIsCreateOpen(true)}>
-            + Add Bookmark
-          </Button>
-        </header>
+                  <div className="flex gap-2">
+                    <button onClick={() => toggleFavorite(bm._id)}>
+                      <Star
+                        className={`w-5 h-5 ${
+                          bm.isFavorite
+                            ? "fill-yellow-500 text-yellow-500"
+                            : "text-gray-400"
+                        }`}
+                      />
+                    </button>
 
-        <div className="flex-1 p-8">
-          <h1 className="text-2xl font-semibold text-white mb-6">
-            Your Bookmarks
-          </h1>
+                    <button onClick={() => handleEdit(bm)}>
+                      <Pencil className="w-5 h-5 text-blue-400" />
+                    </button>
 
-          {loading ? (
-            <p className="text-gray-400">Loading bookmarks...</p>
-          ) : bookmarks.length === 0 ? (
-            <p className="text-gray-400">No bookmarks yet</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {bookmarks.map((bm) => (
-                <div
-                  key={bm._id}
-                  className="bg-[#1a2332] border border-[#2d3748] rounded-lg p-5"
-                >
-                  <div className="flex justify-between mb-2">
-                    <h3 className="text-white font-semibold">
-                      {bm.title}
-                    </h3>
-
-                    <div className="flex gap-2">
-                      <button onClick={() => toggleFavorite(bm._id)}>
-                        <Star
-                          className={`w-5 h-5 ${
-                            bm.isFavorite
-                              ? "fill-yellow-500 text-yellow-500"
-                              : "text-gray-400"
-                          }`}
-                        />
-                      </button>
-
-                      <button onClick={() => handleEdit(bm)}>
-                        <Pencil className="w-5 h-5 text-blue-400" />
-                      </button>
-
-                      <button onClick={() => deleteBookmark(bm._id)}>
-                        <Trash2 className="w-5 h-5 text-red-500" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <a
-                    href={bm.url}
-                    target="_blank"
-                    className="text-blue-400 text-sm flex items-center gap-1 mb-2 hover:underline"
-                  >
-                    Visit <ExternalLink className="w-4 h-4" />
-                  </a>
-
-                  <p className="text-gray-400 text-sm mb-3">
-                    {bm.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2">
-                    {bm.tags?.map((tag: string, i: number) => (
-                      <span
-                        key={i}
-                        className="text-xs px-2 py-1 bg-blue-600/20 text-blue-400 rounded"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                    <button onClick={() => deleteBookmark(bm._id)}>
+                      <Trash2 className="w-5 h-5 text-red-500" />
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
+
+                <a
+                  href={bm.url}
+                  target="_blank"
+                  className="text-blue-400 text-sm flex items-center gap-1 mb-2 hover:underline"
+                >
+                  Visit <ExternalLink className="w-4 h-4" />
+                </a>
+
+                <p className="text-gray-400 text-sm">{bm.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <AddBookmarkModal
         isOpen={isCreateOpen}
@@ -162,6 +147,6 @@ export default function BookmarksPage() {
         fetchBookmarks={() => fetchBookmarks(search)}
         bookmark={selectedBookmark}
       />
-    </div>
+    </main>
   );
 }
