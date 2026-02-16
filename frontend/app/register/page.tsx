@@ -32,7 +32,7 @@ export default function RegisterPage() {
         password,
       });
 
-      setToken(res.data.token);
+      setToken(res.data.token, false);
       router.push("/notes");
     } catch (err: any) {
       setError(
