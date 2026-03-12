@@ -1,171 +1,219 @@
-# NoteMark - Personal Notes & Bookmark Manager
+## NoteMark
 
-## Tech Stack
+**NoteMark** is a full‑stack note and bookmark manager that lets you securely store, search and organize your notes and links in a single workspace.
 
-**Backend**
-- Node.js, Express, MongoDB, JWT (jsonwebtoken)
+The project is split into two apps:
+- **Backend** (`backend`): Node.js/Express REST API with MongoDB, JWT auth, and OAuth (Google/GitHub).
+- **Frontend** (`frontend`): Next.js + React dashboard with a modern, responsive UI.
 
-**Frontend**
-- Next.js (App Router), React, Tailwind CSS, TypeScript
-
-## Project Setup
-
-### Backend
-
-1. Install dependencies:
-   ```bash
-   cd backend && npm install
-   ```
-
-2. Environment variables: create a `.env` file in `backend/` with:
-   - `PORT` – 5000
-   - `MONGO_URI` – MongoDB connection string
-   - `JWT_SECRET` – secret for signing JWT tokens
-
-3. Run:
-   ```bash
-   npm run dev
-   ```
-
-4. Backend base URL: `http://localhost:5000`
-   - API base: `http://localhost:5000/api`
-
-### Frontend
-
-1. Install dependencies:
-   ```bash
-   cd frontend && npm install
-   ```
-
-2. Environment variables: create `.env.local` in `frontend/` with:
-   - `NEXT_PUBLIC_API_URL` – `http://localhost:5000/api`
-
-3. Run:
-   ```bash
-   npm run dev
-   ```
-
-4. Frontend URL: `http://localhost:3000`
+---
 
 ## Features
 
-- Create, update, delete notes
-- Create, update, delete bookmarks
-- Search notes and bookmarks
-- Filter by tags
-- Mark as favorites
-- Responsive UI
+- **Secure authentication**
+  - Email/password login and registration
+  - Multi‑provider OAuth (Google, GitHub)
+  - Session and token based access
 
-**Bonus Implemented**
-- JWT authentication (register, login)
-- User-specific data (notes and bookmarks scoped to logged-in user)
-- Auto-fetch bookmark title when title is empty
+- **Notes**
+  - Create, edit, delete notes
+  - Search notes by text
+  - Favorite/star important notes
+  - Tag‑based filtering
 
-## API Documentation (brief)
+- **Bookmarks**
+  - Save and manage web links
+  - Automatic title fetching for URLs
+  - Starred/favorite bookmarks
 
-### Auth
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| POST | `/api/auth/register` | Register a new user |
-| POST | `/api/auth/login` | Login; returns JWT |
+- **Modern UI**
+  - Dark themed dashboard
+  - Skeleton loading states and toasts
+  - Keyboard‑friendly navigation (command palette, search)
 
-### Notes
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| POST | `/api/notes` | Create a note |
-| GET | `/api/notes` | List notes (query: `q`, `tags`) |
-| GET | `/api/notes/:id` | Get note by id |
-| PUT | `/api/notes/:id` | Update note |
-| DELETE | `/api/notes/:id` | Delete note |
+---
 
-### Bookmarks
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| POST | `/api/bookmarks` | Create a bookmark |
-| GET | `/api/bookmarks` | List bookmarks (query: `q`, `tags`) |
-| GET | `/api/bookmarks/:id` | Get bookmark by id |
-| PUT | `/api/bookmarks/:id` | Update bookmark |
-| DELETE | `/api/bookmarks/:id` | Delete bookmark |
+## Tech Stack
 
-All note and bookmark routes require `Authorization: Bearer <token>`.
+- **Frontend**
+  - Next.js 13 (App Router), React 18, TypeScript
+  - Tailwind CSS, Radix UI components, Shadcn‑style UI
+  - Zustand for state management
+  - Axios for API communication
 
-## Sample cURL Requests
+- **Backend**
+  - Node.js + Express
+  - MongoDB + Mongoose
+  - Passport (Google, GitHub strategies)
+  - JSON Web Tokens (JWT)
+  - Zod for request validation
 
-Create a note (replace `YOUR_JWT_TOKEN` with a token from `/api/auth/login`):
+---
 
-```bash
-curl -X POST http://localhost:5000/api/notes \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d "{\"title\":\"My Note\",\"content\":\"Note content here\",\"tags\":[\"work\"]}"
+## Project Structure
+
+```text
+NoteMark/
+  backend/      # Node/Express API (auth, notes, bookmarks)
+  frontend/     # Next.js app (landing page + dashboard)
+  README.md     # This file
 ```
 
-Create a bookmark:
+For more details, see:
+- `backend/README.md` – API & backend setup
+- `frontend/README.md` – frontend/dashboard setup
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- A running MongoDB instance (local or hosted, e.g. MongoDB Atlas)
+
+### Clone the repository
 
 ```bash
-curl -X POST http://localhost:5000/api/bookmarks \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d "{\"url\":\"https://example.com\",\"description\":\"Example site\",\"tags\":[\"reference\"]}"
+git clone https://github.com/KomalGoel18/NoteMark
+cd NoteMark
 ```
 
-## Skills This Tests
+### Install dependencies
 
-- REST API design
-- Data validation and error handling
-- React (Next.js) routing and state
-- Tailwind CSS for UI
-- Clean code and structure
-- Real-world data modeling
+Install backend packages:
 
-## Folder Structure
+```bash
+cd backend
+npm install
+```
+
+Install frontend packages:
+
+```bash
+cd ../frontend
+npm install
+```
+
+---
+
+## Environment Variables
+
+### Backend (`backend/.env`)
+
+Create a `.env` file in `backend` with values similar to:
+
+```bash
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+CLIENT_URL=http://localhost:3000
+
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_CALLBACK_URL=http://localhost:5000/api/auth/github/callback
+
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USER=you@example.com
+EMAIL_PASSWORD=your_smtp_password
+```
+
+Adjust keys to match your actual configuration (see your auth and mailer setup if present).
+
+### Frontend (`frontend/.env.local`)
+
+Create a `.env.local` file in `frontend`:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5000/api
+```
+
+Update this when deploying to production.
+
+---
+
+## Running the Apps in Development
 
 ### Backend
-```
-backend/
-├── config/
-│   └── db.js
-├── controllers/
-│   ├── auth.controller.js
-│   ├── bookmarks.controller.js
-│   └── notes.controller.js
-├── middleware/
-│   └── auth.middleware.js
-├── models/
-│   ├── user.model.js
-│   ├── note.model.js
-│   └── bookmark.model.js
-├── routes/
-│   ├── auth.routes.js
-│   ├── notes.routes.js
-│   └── bookmarks.routes.js
-├── utils/
-│   └── fetchTitle.js
-├── validations/
-│   ├── auth.validation.js
-│   ├── note.validation.js
-│   └── bookmark.validation.js
-├── app.js
-├── server.js
-└── package.json
+
+```bash
+cd backend
+npm run dev
 ```
 
+This starts the Express API on `http://localhost:5000`.
+
 ### Frontend
+
+```bash
+cd frontend
+npm run dev
 ```
-frontend/
-├── app/
-│   ├── notes/
-│   │   └── page.tsx
-│   ├── bookmarks/
-│   │   └── page.tsx
-│   ├── register/
-│   │   └── page.tsx
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── globals.css
-├── components/
-│   ├── ui/
-│   ├── CreateNoteModal.tsx
-│   └── AddBookmarkModal.tsx
-└── package.json
-```
+
+This starts the Next.js app on `http://localhost:3000`.
+
+Make sure the backend CORS `origin` list in `backend/app.js` includes your frontend URL.
+
+---
+
+## API Overview
+
+Base URL: `http://localhost:5000/api`
+
+- **Auth**
+  - `POST /auth/register`
+  - `POST /auth/login`
+  - OAuth routes for Google/GitHub (see `backend/routes/auth.routes.js`)
+
+- **Notes**
+  - `GET /notes` – list notes (supports `?q=` search and `&tags=` filter)
+  - `POST /notes` – create a note
+  - `PATCH /notes/:id` – update a note
+  - `DELETE /notes/:id` – delete a note
+  - `PATCH /notes/:id/favorite` – toggle favorite
+
+- **Bookmarks**
+  - `GET /bookmarks`
+  - `POST /bookmarks`
+  - `PATCH /bookmarks/:id`
+  - `DELETE /bookmarks/:id`
+
+See the backend README for more details and any additional routes.
+
+---
+
+## Frontend Overview
+
+Key routes in the Next.js app:
+
+- `/` – public marketing/landing page
+- `/login` – login form
+- `/register` – registration
+- `/forgot-password`, `/reset-password/[token]` – auth flows
+- `/notes` – notes dashboard
+- `/bookmarks` – bookmarks dashboard
+- `/starred` – starred items
+
+The UI uses reusable components in `components/ui` and domain components like `CreateNoteModal` and `AddBookmarkModal`.
+
+---
+
+## Scripts
+
+- **Backend**
+  - `npm run dev` – start backend with nodemon
+  - `npm start` – start backend with Node
+
+- **Frontend**
+  - `npm run dev` – start Next.js dev server
+  - `npm run build` – build for production
+  - `npm start` – run production build
+  - `npm run lint` – lint the codebase
+  - `npm run typecheck` – TypeScript type checking
+
+---
