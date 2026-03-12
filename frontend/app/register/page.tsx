@@ -45,12 +45,14 @@ export default function RegisterPage() {
     }
   };
 
+  // ✅ ADDED: OAuth handlers (same backend flow as login page)
+
   const handleGoogleClick = () => {
-    alert("Google signup not implemented");
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
   };
 
   const handleAppleClick = () => {
-    alert("Apple signup not implemented");
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/github`;
   };
 
   return (
@@ -222,7 +224,7 @@ export default function RegisterPage() {
               className="h-12 bg-[#1a2332] border-[#2d3748] hover:bg-[#2d3748] text-white"
             >
               <span className="mr-2"></span>
-              Apple
+              Github
             </Button>
           </div>
         </form>
@@ -230,7 +232,7 @@ export default function RegisterPage() {
         <div className="mt-8 text-center">
           <p className="text-gray-400 text-sm">
             Already have an account?{' '}
-            <Link href="/" className="text-blue-500 hover:text-blue-400 font-medium">
+            <Link href="/login" className="text-blue-500 hover:text-blue-400 font-medium">
               Sign in here
             </Link>
           </p>

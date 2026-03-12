@@ -126,7 +126,7 @@ export default function AddBookmarkModal({
 
         {/* TITLE */}
         <div className="space-y-2">
-          <label className="text-sm text-gray-400">Title (optional)</label>
+          <label className="text-sm text-gray-400">Title (Would be added on its own😉)</label>
           <Input
             placeholder="Enter bookmark title"
             value={title}

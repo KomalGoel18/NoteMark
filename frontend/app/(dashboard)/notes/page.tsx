@@ -23,8 +23,10 @@ export default function NotesPage() {
   const [tagFilter, setTagFilter] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) router.push("/");
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    if (!token) router.push("/login");
     else fetchNotes();
   }, [router]);
 

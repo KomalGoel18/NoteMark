@@ -3,13 +3,20 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://notemark-hub.vercel.app",
+    ],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 app.use("/api/auth", require("./routes/auth.routes"));
-
 app.use("/api/notes", require("./routes/notes.routes"));
-
 app.use("/api/bookmarks", require("./routes/bookmarks.routes"));
 
 app.get("/", (req, res) => {

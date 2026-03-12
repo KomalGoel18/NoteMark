@@ -1,12 +1,18 @@
 require("dotenv").config();
 const dns = require("dns");
 
-// Fix for MongoDB Atlas SRV resolution issues in some environments/ISPs
-// Forces Node to use public DNS servers instead of the potentially broken system local resolver
+// ✅ Fix MongoDB SRV DNS issues
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
+
+const express = require("express");
+const passport = require("passport");        // ✅ IMPORT PASSPORT
+require("./config/passport");                // ✅ LOAD STRATEGIES
 
 const app = require("./app");
 const connectDB = require("./config/db");
+
+// ✅ Passport middleware
+app.use(passport.initialize());
 
 const startServer = async () => {
   try {
@@ -15,11 +21,11 @@ const startServer = async () => {
     const PORT = process.env.PORT || 5000;
 
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
 
   } catch (error) {
-    console.error("Failed to start server:", error.message);
+    console.error("❌ Failed to start server:", error.message);
     process.exit(1);
   }
 };

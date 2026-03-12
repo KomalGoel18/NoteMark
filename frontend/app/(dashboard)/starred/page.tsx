@@ -2,6 +2,7 @@
 
 import API from "@/lib/api";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function StarredPage() {
   const [notes, setNotes] = useState<any[]>([]);
@@ -18,6 +19,20 @@ export default function StarredPage() {
     setNotes(notesRes.data.notes);
     setBookmarks(bmRes.data.bookmarks);
   };
+  
+  const router = useRouter();
+
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    fetchStarred();
+  }, []);
 
   return (
     <main className="flex-1 p-8 bg-[#0f1419] min-h-screen text-white">

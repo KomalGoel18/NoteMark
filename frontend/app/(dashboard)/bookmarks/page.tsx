@@ -22,8 +22,10 @@ export default function BookmarksPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) router.push("/");
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    if (!token) router.push("/login");
     else fetchBookmarks();
   }, [router]);
 
@@ -73,7 +75,12 @@ export default function BookmarksPage() {
           />
         </div>
 
-        <Button onClick={() => setIsCreateOpen(true)}>
+        <Button
+          onClick={() => {
+            setSelectedBookmark(null);
+            setIsCreateOpen(true);
+          }}
+        >
           + Add Bookmark
         </Button>
       </header>
