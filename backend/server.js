@@ -14,6 +14,14 @@ const connectDB = require("./config/db");
 // ✅ Passport middleware
 app.use(passport.initialize());
 
+// ✅ Health route for cron ping
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Server running",
+  });
+});
+
 const startServer = async () => {
   try {
     await connectDB();
